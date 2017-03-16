@@ -36,7 +36,7 @@ public class TestAbsenceSystem {
        	System.out.print("Average monthly absence for student 5: ");
        	System.out.println(absenceSystem.averageMonth(absence15t, 4) + " days");
        	
-       	System.out.print("Students with no absence: ");
+       	System.out.print("Amount of students with no absence: ");
        	System.out.println(absenceSystem.studentWithoutAbsenceCount(absence15t));
        	
        	System.out.print("Student with the most absense: #");
@@ -44,7 +44,5 @@ public class TestAbsenceSystem {
         
        	absenceSystem.reset(absence15t, 4);
        	absenceSystem.printAbsence(absence15t);
-       
-
     }
 }
