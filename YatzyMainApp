@@ -1,0 +1,237 @@
+package yatzy;
+
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
+
+public class MainApp extends Application {
+	public static void main(String[] args) {
+		Application.launch(args);
+	}
+
+	@Override
+	public void start(Stage stage) {
+		stage.setTitle("Yatzy");
+		GridPane pane = new GridPane();
+		this.initContent(pane);
+		Scene scene = new Scene(pane);
+		stage.setScene(scene);
+		stage.setResizable(false);
+		stage.show();
+	}
+
+	// -------------------------------------------------------------------------
+
+	// The Yatzy game object
+	private Yatzy yatzy = new Yatzy();
+	// Shows the face values of the 5 dice.
+	private TextField[] txfValues;
+	// Shows the hold status of the 5 dice.
+	private CheckBox[] chbHolds;
+	private TextField[] txfResults;
+	private TextField txfSumSame, txfBonus, txfSumOther, txfTotal;
+	private Label lblRolled;
+	private Button btnRoll;
+	private Controller controller = new Controller();
+	private int sumSame, sumOther, bonus, total;
+	private boolean[] isDisabled;
+	
+
+	private void initContent(GridPane pane) {
+		pane.setGridLinesVisible(false);
+		pane.setPadding(new Insets(10));
+		pane.setHgap(10);
+		pane.setVgap(10);
+
+		// ---------------------------------------------------------------------
+
+		GridPane dicePane = new GridPane();
+		pane.add(dicePane, 0, 0);
+		dicePane.setGridLinesVisible(false);
+		dicePane.setPadding(new Insets(10));
+		dicePane.setHgap(10);
+		dicePane.setVgap(10);
+		dicePane.setStyle("-fx-border-color: black");
+
+		txfValues = new TextField[5];
+		chbHolds = new CheckBox[5];
+		
+		for (int i = 0; i < chbHolds.length; i++) {
+
+			TextField tf = new TextField();
+			tf.setEditable(false);
+			tf.setFont(Font.font("Verdana", 30));
+			tf.setMaxWidth(70);
+			CheckBox cb = new CheckBox("Hold");
+			cb.setDisable(true);
+			dicePane.add(tf, 0 + i, 0);
+			dicePane.add(cb, 0 + i, 2);
+
+			txfValues[i] = tf;
+			chbHolds[i] = cb;
+		}
+
+		btnRoll = new Button("Roll");
+		btnRoll.setFont(Font.font(20));
+		lblRolled = new Label("Rolled: " + yatzy.getThrowCount());
+		dicePane.add(btnRoll, 3, 3);
+		dicePane.add(lblRolled, 4, 3);
+		// TODO: initialize txfValues, chbHolds, btnRoll and lblRolled
+
+		// Button action
+		
+		btnRoll.setOnAction(event -> controller.rollDices());
+
+		// ---------------------------------------------------------------------
+
+		GridPane scorePane = new GridPane();
+		pane.add(scorePane, 0, 1);
+		scorePane.setGridLinesVisible(false);
+		scorePane.setPadding(new Insets(10));
+		scorePane.setVgap(5);
+		scorePane.setHgap(10);
+		scorePane.setStyle("-fx-border-color: black");
+		txfResults = new TextField[yatzy.getPossibleResults().length];
+		String[] labels = {"1-s", "2-s", "3-s", "4-s", "5-s", "6-s", "One pair", "Two pairs", "Three same", "Four same", "Full house", "Small Straight", "Large Straight", "Chance", "Yatzy"};
+		
+		for (int i = 0; i < yatzy.getPossibleResults().length; i++){
+			TextField tf = new TextField();
+			int count = i;
+			Label lb = new Label(labels[i]);
+			tf.setEditable(false);
+			tf.setFont(Font.font("Verdana", 14));
+			tf.setMaxWidth(50);
+			tf.setMaxHeight(50);
+			tf.setMinWidth(50);
+			scorePane.add(tf, 1, 0+i);
+			scorePane.add(lb, 0, 0+i);
+			txfResults[i] = tf;
+			tf.setOnMouseClicked(event->controller.saveResult(count));
+		}
+	
+
+		// TODO: Initialize labels for results, txfResults,
+		// labels and text fields for sums, bonus and total.
+		Label sum = new Label("Sum:");
+		scorePane.add(sum, 2, 5);
+		Label sum2 = new Label("Sum:");
+		scorePane.add(sum2, 2, 14);
+		Label bonus = new Label("Bonus:");
+		scorePane.add(bonus, 4, 5);
+		Label total = new Label("Total:");
+		scorePane.add(total, 4, 14);
+		txfBonus = new TextField();
+		txfBonus.setMaxWidth(50);
+		txfBonus.setEditable(false);
+		scorePane.add(txfBonus, 5, 5);
+		txfSumSame = new TextField();
+		txfSumSame.setMaxWidth(50);
+		txfSumSame.setEditable(false);
+		scorePane.add(txfSumSame, 3, 5);
+		txfSumOther = new TextField();
+		txfSumOther.setMaxWidth(50);
+		txfSumOther.setEditable(false);
+		scorePane.add(txfSumOther, 3, 14);
+		txfTotal = new TextField();
+		txfTotal.setMaxWidth(50);
+		txfTotal.setEditable(false);
+		scorePane.add(txfTotal, 5, 14);
+	}
+
+	// -------------------------------------------------------------------------
+
+	// TODO: Create a method for btnRoll's action.
+	// Hint: Create small helper methods to be used in the action method.
+
+	// -------------------------------------------------------------------------
+
+	// TODO: Create a method for mouse click on one of the text fields in
+	// txfResults.
+	// Hint: Create small helper methods to be used in the mouse click method.
+
+	/**
+	 * This class controls access to the model in this application.
+	 */
+	private class Controller {
+		private void rollDices() {
+			if (yatzy.getThrowCount() == 2){
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				//TODO: SKIFT TILBAGE TIL TRUE EFTER QA TESTING
+				
+				btnRoll.setDisable(true);
+			}
+			else {
+				btnRoll.setDisable(false);
+			}
+			yatzy.throwDice(setRollToThrow());
+			
+			
+			int[] newValues = yatzy.getValues();
+			for (int i = 0; i < newValues.length; i++) {
+					txfValues[i].setText(newValues[i] + "");
+			}
+			lblRolled.setText("Rolled: " + yatzy.getThrowCount());
+			
+			for (int i = 0; i < txfResults.length; i++) {
+				if(!txfResults[i].isDisabled()){
+					txfResults[i].setText(yatzy.getPossibleResults()[i] + "");
+				}
+			}
+		}
+
+		private boolean[] setRollToThrow() {
+			boolean[] toThrow = new boolean[5];
+
+			for (int i = 0; i < chbHolds.length; i++) {
+				chbHolds[i].setDisable(false);
+				if (chbHolds[i].isSelected()) {
+					toThrow[i] = true;
+				} else {
+					toThrow[i] = false;
+				}
+			}
+			return toThrow;
+		}
+		
+		private void saveResult(int saveNumber){
+		
+				if (txfResults[saveNumber].isFocused()){
+					yatzy.resetThrowCount();
+					txfResults[saveNumber].setDisable(true);
+					txfResults[saveNumber].cancelEdit();
+					resetUI();
+				}
+			}
+		private void resetUI(){
+			String[] tempValuez = {"", "", "", "", ""};
+			for (int i = 0; i < yatzy.getValues().length; i++) {
+				txfValues[i].setText(tempValuez[i] + "");
+				chbHolds[i].setSelected(false);
+			}
+			btnRoll.setDisable(false);
+			lblRolled.setText("Rolled: " + yatzy.getThrowCount());
+			btnRoll.requestFocus();
+		}
+		private void sumNumbers(){
+			sumSame = 0; sumOther = 0; bonus = 0; total = 0;
+			for (int i = 0; i <6; i++){
+				
+			}
+		}
+				//sumSame, sumOther, bonus, total;
+		}
+	}
