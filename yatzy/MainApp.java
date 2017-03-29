@@ -99,7 +99,7 @@ public class MainApp extends Application {
 			int count = i;
 			Label lb = new Label(labels[i]);
 			tf.setEditable(false);
-			tf.setFont(Font.font(STYLESHEET_CASPIAN, 12));
+			tf.setFont(Font.font(STYLESHEET_CASPIAN, 14));
 			tf.setMaxWidth(35);
 			tf.setMaxHeight(50);
 			scorePane.add(tf, 1, 0+i);
@@ -122,21 +122,21 @@ public class MainApp extends Application {
 		txfBonus.setText("0");
 		txfSumOther.setText("0");
 		txfTotal.setText("0");
-		txfBonus.setMaxWidth(35);
-		txfSumSame.setMaxWidth(35);
-		txfSumOther.setMaxWidth(35);
-		txfTotal.setMaxWidth(35);
+		txfBonus.setMaxWidth(40);
+		txfSumSame.setMaxWidth(40);
+		txfSumOther.setMaxWidth(40);
+		txfTotal.setMaxWidth(40);
 		txfBonus.setEditable(false);
 		txfSumSame.setEditable(false);
 		txfSumOther.setEditable(false);
 		txfTotal.setEditable(false);
-		txfTotal.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfTotal.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 14));
 		txfTotal.setStyle("-fx-text-fill: blue");
-		txfSumSame.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfSumSame.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 14));
 		txfSumSame.setStyle("-fx-text-fill: blue");
-		txfSumOther.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfSumOther.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 14));
 		txfSumOther.setStyle("-fx-text-fill: blue");
-		txfBonus.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfBonus.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 14));
 		txfBonus.setStyle("-fx-text-fill: blue");
 		
 	}
@@ -150,7 +150,7 @@ public class MainApp extends Application {
 			unlockRest();
 			
 			if(yatzy.getThrowCount() == 2){
-				btnRoll.setDisable(false);
+				btnRoll.setDisable(true);
 			}
 			else{
 				btnRoll.setDisable(false);
@@ -170,8 +170,6 @@ public class MainApp extends Application {
 					txfResults[i].setText(yatzy.getPossibleResults()[i] + "");
 				}
 			}
-			System.out.println("value three: "+yatzy.valueThree());
-			System.out.println("value two: "+yatzy.valueOnePairFix());
 		}
 		/**
 		 * Decides which dice are held and shouldn't be thrown in the rollDices() method.
