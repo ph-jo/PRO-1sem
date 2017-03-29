@@ -1,5 +1,6 @@
 package yatzy;
 
+
 import java.util.Arrays;
 import java.util.Random;
 
@@ -31,11 +32,11 @@ public class Yatzy {
 	 */
 	public void throwDice(boolean[] holds) {
 
-		for (int i = 0; i < holds.length; i++) {
-			if (!holds[i]) {
-
+		for(int i = 0; i < holds.length; i++) {
+			if(!holds[i]) {
 				int ran = random.nextInt(6) + 1;
-				
+				values[i] = ran;
+				//System.out.println("Dice" + (i+1) + " = " + ran);
 			}
 		}
 
@@ -76,7 +77,7 @@ public class Yatzy {
 	 */
 	public int[] getPossibleResults() {
 		int[] results = new int[15];
-		for (int i = 0; i <= 5; i++) {
+		for(int i = 0; i <= 5; i++) {
 			results[i] = this.valueSpecificFace(i + 1);
 		}
 		results[6] = this.valueOnePair();
@@ -102,7 +103,7 @@ public class Yatzy {
 		int[] req = new int[7];
 		for (int i = 0; i < values.length; i++){
 			for(int j = 1; j < req.length; j++){
-				if (j == values[i]){
+				if(j == values[i]){
 					req[j]++;
 				}
 			}
@@ -147,7 +148,7 @@ public class Yatzy {
 		int[] valuez = freqFaceValue();
 		int sum = 0;
 		for(int i = 1; i < valuez.length; i++){
-			if (valuez[i] >= n){
+			if(valuez[i] >= n){
 				sum = n*i;
 			}
 		}
@@ -162,13 +163,13 @@ public class Yatzy {
 		int points = 0;
 		int check = values[0];
 		
-		for (int i = 1; i < values.length; i++){
+		for(int i = 1; i < values.length; i++){
 			if(values[i] != check) {
 				yatzy = false;
 
 			}
 		}
-		if (yatzy){
+		if(yatzy){
 			points = 50;
 		}
 		return points;
@@ -208,13 +209,14 @@ public class Yatzy {
 				}
 			}
 
-			if (count == 1) {
+			if (count >= 1) {
 				sum = highest;
 				count = 0;
 			}
 		}
 
 		return sum*2;
+		
 	}
 
 	/**
@@ -222,17 +224,90 @@ public class Yatzy {
 	 */
 	public int valueTwoPair() {
 		int[] valuez = freqFaceValue();
-
 		int sum = 0;
-
-		for (int i = 1; i < valuez.length; i++) {
-			if (valuez[i] >= 2) {
-				sum += 2 * i;
+		int count = 0;
+		int sum1 = 0;
+		int sum2 = 0;
+		/*
+		for(int i = 1; i <=6; i++){
+			for(int j = 0; j < values.length; j++){
+				if(valueOnePair()/2==i){
+					count++;
+				}
 			}
+			if(count>=2){
+				sum1=valueOnePair();
+				}
+			count = 0;
+			}
+			
+	
+		for(int i = 1; i <=6; i++){
+			for(int j = 0; j < values.length; j++){
+				if(valueOnePair()/2==i && i != sum1/2){
+					count++;
+				}
+			}
+			if(count>=2){
+				sum2=valueOnePair();
+			}
+			count = 0;
 		}
-
+		*/
+		for(int i = 1; i < valuez.length; i++) {
+			if(valuez[i] >= 2) {
+				count++;
+				sum1=2*i;
+				}
+			if(count >=2){
+				sum = 0;
+			}
+			count=0;
+		}
+		for(int i = 1; i < valuez.length; i++){
+			if(valuez[i]>=2 && i != sum1/2){
+				count++;
+				sum2=2*i;
+			}
+			if(count >= 2){
+				sum = 0;
+			}
+			count=0;
+		}
+		
+		if(sum1 > 0 && sum2 > 0){
+			sum = sum1+sum2;
+		}
 		return sum;
 	}
+	public int valueOnePairFix(){
+		int[] valuez = freqFaceValue();
+		int count = 0;
+		int sum = 0;
+		int highest = Integer.MAX_VALUE;
+		int amount = 0;
+		for (int i = 0; i < values.length; i++) {
+			for (int j = 0; j < values.length; j++) {
+				if (values[j] == values[i]) {
+					if (j != i && values[j] <= highest) {
+						count++;
+						highest = values[j];
+						amount = valuez[i];
+					}
+				}
+			
+			}
+
+			if (count >= 1 && amount == 2) {
+				sum = highest;
+				count = 0;
+			}
+		}
+		System.out.println(amount);
+
+		return sum*2;
+	}
+	
 
 	/**
 	 * Returns the current score for three of a kind.
@@ -251,37 +326,36 @@ public class Yatzy {
 	/**
 	 * Returns the value of a small straight with the current face values.
 	 */
-	public int valueSmallStraight() {
-		boolean isStraight = true;
-		Arrays.sort(values);
-		for (int i = 1; i < values.length; i++){
-			if (i != values[i]){
-				isStraight = false;
+	public int valueSmallStraight(){
+		int[] valuez = freqFaceValue();
+		int sum = 1;
+		for(int i = 1; i <= values.length; i++)
+		{
+			if(valuez[i] == 1 && valuez[6] == 0 && sum != 0)
+			{
+				sum = 15;
+			}
+			else{
+				sum = 0;
 			}
 		}
-		if(isStraight){
-			return 15;
-		}
-		return 0;
+		return sum;
 	}
-
 	/**
 	 * Returns the value of a large straight with the current face values.
 	 */
 	public int valueLargeStraight() {
-		boolean isStraightt = true;
-		Arrays.sort(values);
-		for (int i = 1; i < values.length; i++){
-			if (i+1 != values[i]){
-				isStraightt = false;
+		int[] valuez = freqFaceValue();
+		int sum = 1;
+		for(int i = 1; i <= values.length; i++){
+			if(valuez[i] == 1 && valuez[1] == 0 && sum != 0){
+				sum = 20;
+			}
+			else{
+				sum = 0;
 			}
 		}
-		if(isStraightt){
-			return 20;
-		}
-		else{
-			return 0;
-		}
+		return sum;
 	}
 
 	/**
@@ -289,15 +363,56 @@ public class Yatzy {
 	 */
 	public int valueFullHouse() {
 		boolean fullHouse = false;
-		if (valueOnePair() > 0 && valueThree() > 0); {
-			if(valueOnePair() != valueThree()/3*2){
-			fullHouse = true;
+		int[] valuez = freqFaceValue();
+		int sum3= 0;
+		int sum2 = 0;
+		//forsøg 1
+		//if(valueThree() > 0 && valueOnePair() > 0){
+				//	return valueThree() + valueOnePair();
+				//}else{
+				//	return 0;
+			//	}
+		//forsøg 2
+		 if (valueThree() > 0 && valueOnePair()> 0){
+			if(valueThree()/3 != valueOnePair()/2){
+				fullHouse = true;
 			}
 		}
-		if (fullHouse){
+		if(fullHouse){
 			return valueOnePair() + valueThree();
 		}
-		return 0;
+		else{
+			return 0;
+		}
+				
+	
+		//forsøg 3
+		/*for (int i = 0; i < values.length; i++){
+			if (valuez[i] == 2){
+				sum2 = 2*values[i];
+			}
+			if (valuez[i] == 3){
+				sum3= 3*values[i];
+			}
+		}
+		if(sum2>0&&sum3>0){
+			return sum2+sum3;
+		}
+		else{
+			return 0;
+			
+		}
+		*/
+		//forsøg 4
+		//int[]fullHouseArray = values;
+		//Arrays.sort(fullHouseArray);
+		//int tempSum = 0;
+		//if(fullHouseArray[0] == fullHouseArray[1] && fullHouseArray[1] == fullHouseArray[2] && fullHouseArray[2] == fullHouseArray[3] && fullHouseArray[3] == fullHouseArray[4]){
+		//	return fullHouseArray[0] + fullHouseArray[1] +fullHouseArray[2] +fullHouseArray[3] +fullHouseArray[4];
+	//	}
+		//else{
+	//		return 0;
+	//	}
 	}
 
 }
