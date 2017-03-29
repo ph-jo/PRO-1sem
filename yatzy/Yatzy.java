@@ -346,9 +346,9 @@ public class Yatzy {
 	 */
 	public int valueLargeStraight() {
 		int[] valuez = freqFaceValue();
-		int sum = 1;
+		int sum = 0;
 		for(int i = 1; i <= values.length; i++){
-			if(valuez[i] == 1 && valuez[1] == 0 && sum != 0){
+			if(valuez[i] == 1 && valuez[1] == 0){
 				sum = 20;
 			}
 			else{
@@ -373,7 +373,7 @@ public class Yatzy {
 				//	return 0;
 			//	}
 		//forsøg 2
-		 if (valueThree() > 0 && valueOnePair()> 0){
+		/* if (valueThree() > 0 && valueOnePair()> 0){
 			if(valueThree()/3 != valueOnePair()/2){
 				fullHouse = true;
 			}
@@ -383,8 +383,19 @@ public class Yatzy {
 		}
 		else{
 			return 0;
+		}*/
+		for(int i = 0; i < values.length; i++){
+			if(valueThree() > 0 && valuez[i]==2){
+				sum3 = valueThree();
+				sum2 = valuez[i]*i;
+			}
 		}
-				
+		if(sum2>0&&sum3>0){
+			return sum2+sum3;
+		}
+		else{
+			return 0;
+		}
 	
 		//forsøg 3
 		/*for (int i = 0; i < values.length; i++){
@@ -403,6 +414,7 @@ public class Yatzy {
 			
 		}
 		*/
+		
 		//forsøg 4
 		//int[]fullHouseArray = values;
 		//Arrays.sort(fullHouseArray);
