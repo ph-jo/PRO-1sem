@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -148,7 +149,6 @@ public class MainApp extends Application {
 
 		private void rollDices() {
 			unlockRest();
-			
 			if(yatzy.getThrowCount() == 2){
 				btnRoll.setDisable(true);
 			}
@@ -156,6 +156,7 @@ public class MainApp extends Application {
 				btnRoll.setDisable(false);
 			}
 			
+		
 			yatzy.throwDice(setRollToThrow());
 			int[] newValues = yatzy.getValues();
 			
@@ -189,23 +190,18 @@ public class MainApp extends Application {
 		}
 		
 		private void saveResult(int saveNumber){
-		
-				if(txfResults[saveNumber].isFocused()){
-					yatzy.resetThrowCount();
-					txfResults[saveNumber].setDisable(true);
-					txfResults[saveNumber].cancelEdit();
-					isTaken[saveNumber] = true;
-					resetUI();
-					sumNumbers();
-					lockAll();
-					gameComplete();
-				}
+			yatzy.resetThrowCount();
+			txfResults[saveNumber].setDisable(true);
+			isTaken[saveNumber] = true;
+			resetUI();
+			sumNumbers();
+			lockAll();
+			gameComplete();
 			}
 		
 		private void resetUI(){
-			String[] tempValuez = {"", "", "", "", ""};
 			for(int i = 0; i < yatzy.getValues().length; i++) {
-				txfValues[i].setText(tempValuez[i] + "");
+				txfValues[i].setText("");
 				chbHolds[i].setSelected(false);
 			}
 			btnRoll.setDisable(false);
@@ -214,7 +210,8 @@ public class MainApp extends Application {
 		}
 		private void sumSame(){
 			sumSame = 0; 
-			for(int i = 0; i <6; i++){
+			int amountOfSames =6;
+			for(int i = 0; i <amountOfSames; i++){
 				if(isTaken[i]){
 					sumSame += Integer.parseInt(txfResults[i].getText());
 				}
@@ -233,7 +230,8 @@ public class MainApp extends Application {
 		private void sumBonus(){
 			bonus = 0;
 			if(sumSame >= 63){
-				txfBonus.setText("50");
+				bonus = 50;
+				txfBonus.setText(bonus+"");
 			}
 			
 		}
@@ -291,12 +289,15 @@ public class MainApp extends Application {
 		 * Creates an alert shown to the player, informing the user of his points, with an option to play a new game if the player wishes.
 		 */
 		private void gameCompleteAlert(){
-			Alert gameCompleted = new Alert(AlertType.INFORMATION);
+			Alert gameCompleted = new Alert(AlertType.NONE);
 			gameCompleted.setTitle("Game Complete");
 			gameCompleted.setHeaderText("Your points: " + txfTotal.getText());
 			Button yesBtn = new Button("Yes");
 			Button noBtn = new Button("No");
+			ButtonType yesBten = new ButtonType("Yes");
+			//TODO: lav buttons på alert og resetGame() metode!
 			gameCompleted.getButtonTypes();
+			
 			gameCompleted.showAndWait();
 	
 			if(yesBtn.isPressed()){
