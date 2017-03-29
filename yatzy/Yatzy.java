@@ -1,418 +1,302 @@
 package yatzy;
 
 
-import java.util.Arrays;
-import java.util.Random;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 
-/**
- * Models a game of Yatzy.
- */
-public class Yatzy {
+public class MainApp extends Application {
+	public static void main(String[] args) {
+		Application.launch(args);
+	}
+
+	@Override
+	public void start(Stage stage) {
+		stage.setTitle("Yatzy");
+		GridPane pane = new GridPane();
+		this.initContent(pane);
+		Scene scene = new Scene(pane);
+		stage.setScene(scene);
+		stage.setResizable(false);
+		stage.show();
+	}
+
+	// -------------------------------------------------------------------------
+
+	// The Yatzy game object
+	private Yatzy yatzy = new Yatzy();
+	// Shows the face values of the 5 dice.
+	private TextField[] txfValues;
+	// Shows the hold status of the 5 dice.
+	private CheckBox[] chbHolds;
+	private TextField[] txfResults;
+	private TextField txfSumSame, txfBonus, txfSumOther, txfTotal;
+	private Label lblRolled;
+	private Button btnRoll;
+	private Controller controller = new Controller();
+	private int sumSame, sumOther, bonus, total;
+	private boolean[] isTaken = new boolean[yatzy.getPossibleResults().length];
+
+	private void initContent(GridPane pane) {
+		pane.setGridLinesVisible(false);
+		pane.setPadding(new Insets(10));
+		pane.setHgap(10);
+		pane.setVgap(10);
+		// ---------------------------------------------------------------------
+
+		GridPane dicePane = new GridPane();
+		pane.add(dicePane, 0, 0);
+		dicePane.setGridLinesVisible(false);
+		dicePane.setPadding(new Insets(10));
+		dicePane.setHgap(10);
+		dicePane.setVgap(5);
+		dicePane.setStyle("-fx-border-color: black");
+
+		txfValues = new TextField[5];
+		chbHolds = new CheckBox[5];
+		
+		for(int i = 0; i < chbHolds.length; i++) {
+			TextField tf = new TextField();
+			tf.setEditable(false);
+			tf.setFont(Font.font(STYLESHEET_CASPIAN, 30));
+			tf.setMaxWidth(70);
+			CheckBox cb = new CheckBox("Hold");
+			cb.setDisable(true);
+			dicePane.add(tf, 0 + i, 0);
+			dicePane.add(cb, 0 + i, 2);
+			txfValues[i] = tf;
+			chbHolds[i] = cb;
+		}
+		btnRoll = new Button("Roll");
+		btnRoll.setFont(Font.font(20));
+		lblRolled = new Label("Rolled: " + yatzy.getThrowCount());
+		dicePane.add(btnRoll, 3, 3);
+		dicePane.add(lblRolled, 4, 3);
+		btnRoll.setOnAction(event -> controller.rollDices());
+		// ---------------------------------------------------------------------
+		GridPane scorePane = new GridPane();
+		pane.add(scorePane, 0, 1);
+		scorePane.setGridLinesVisible(false);
+		scorePane.setPadding(new Insets(10));
+		scorePane.setVgap(5);
+		scorePane.setHgap(10);
+		scorePane.setStyle("-fx-border-color: black");
+		txfResults = new TextField[yatzy.getPossibleResults().length];
+		String[] labels = {"Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "One pair", "Two pairs", "Three of a kind", "Four of a kind", "Full house", "Small Straight", "Large Straight", "Chance", "Yatzy"};
+		
+		for(int i = 0; i < yatzy.getPossibleResults().length; i++){
+			TextField tf = new TextField();
+			int count = i;
+			Label lb = new Label(labels[i]);
+			tf.setEditable(false);
+			tf.setFont(Font.font(STYLESHEET_CASPIAN, 12));
+			tf.setMaxWidth(35);
+			tf.setMaxHeight(50);
+			scorePane.add(tf, 1, 0+i);
+			scorePane.add(lb, 0, 0+i);
+			txfResults[i] = tf;
+			tf.setOnMouseClicked(event->controller.saveResult(count));
+		}
+		Label sum = new Label("Sum:"); Label bonus = new Label("Bonus:"); 	Label sum2 = new Label("Sum:");	Label total = new Label("Total:");
+		txfBonus = new TextField(); txfSumSame = new TextField(); txfSumOther = new TextField(); txfTotal = new TextField();
+		scorePane.add(sum, 2, 5);
+		scorePane.add(sum2, 2, 14);
+		scorePane.add(bonus, 4, 5);
+		scorePane.add(total, 4, 14);
+		scorePane.add(txfBonus, 5, 5);
+		scorePane.add(txfSumSame, 3, 5);
+		scorePane.add(txfSumOther, 3, 14);
+		scorePane.add(txfTotal, 5, 14);
+		txfSumSame.setText("0");
+		txfBonus.setText("0");
+		txfSumOther.setText("0");
+		txfTotal.setText("0");
+		txfBonus.setMaxWidth(35);
+		txfSumSame.setMaxWidth(35);
+		txfSumOther.setMaxWidth(35);
+		txfTotal.setMaxWidth(35);
+		txfBonus.setEditable(false);
+		txfSumSame.setEditable(false);
+		txfSumOther.setEditable(false);
+		txfTotal.setEditable(false);
+		txfTotal.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfTotal.setStyle("-fx-text-fill: blue");
+		txfSumSame.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfSumSame.setStyle("-fx-text-fill: blue");
+		txfSumOther.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfSumOther.setStyle("-fx-text-fill: blue");
+		txfBonus.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
+		txfBonus.setStyle("-fx-text-fill: blue");
+		
+		
+	}
+	// -------------------------------------------------------------------------
 	/**
-	 * Face values of the 5 dice. <br/>
-	 * 1 <= values[i] <= 6.
+	 * This class controls access to the model in this application.
 	 */
-	private int[] values = new int[5];
-
-	/**
-	 * Number of times the 5 dice have been thrown. <br/>
-	 * 0 <= throwCount <= 3.
-	 */
-	private int throwCount = 0;
-
-	/**
-	 * Random number generator.
-	 */
-	private Random random = new Random();
-
-	/**
-	 * Rolls the 5 dice. <br/>
-	 * Only roll dice that are not hold. <br/>
-	 * Requires: holds contain 5 boolean values.
-	 */
-	public void throwDice(boolean[] holds) {
-
-		for(int i = 0; i < holds.length; i++) {
-			if(!holds[i]) {
-				int ran = random.nextInt(6) + 1;
-				values[i] = ran;
-				//System.out.println("Dice" + (i+1) + " = " + ran);
+	private class Controller {
+		
+		private void rollDices() {
+			unlockRest();
+			
+			if(yatzy.getThrowCount() == 2){
+				btnRoll.setDisable(false);
+			}
+			else{
+				btnRoll.setDisable(false);
+			}
+			
+			yatzy.throwDice(setRollToThrow());
+			int[] newValues = yatzy.getValues();
+			
+			for(int i = 0; i < newValues.length; i++) {
+					txfValues[i].setText(newValues[i] + "");
+			}
+			
+			lblRolled.setText("Rolled: " + yatzy.getThrowCount());
+			
+			for(int i = 0; i < txfResults.length; i++) {
+				if(!txfResults[i].isDisabled()){
+					txfResults[i].setText(yatzy.getPossibleResults()[i] + "");
+				}
+			}
+			System.out.println("value three: "+yatzy.valueThree());
+			System.out.println("value two: "+yatzy.valueOnePairFix());
+		}
+		/**
+		 * Decides which dice are held and shouldn't be thrown in the rollDices() method.
+		 * @return toThrow - returns which dice aren't held.
+		 */
+		private boolean[] setRollToThrow() {
+			boolean[] toThrow = new boolean[5];
+			for(int i = 0; i < chbHolds.length; i++) {
+				chbHolds[i].setDisable(false);
+				if (chbHolds[i].isSelected()) {
+					toThrow[i] = true;
+				} else {
+					toThrow[i] = false;
+				}
+			}
+			return toThrow;
+		}
+		
+		private void saveResult(int saveNumber){
+		
+				if(txfResults[saveNumber].isFocused()){
+					yatzy.resetThrowCount();
+					txfResults[saveNumber].setDisable(true);
+					txfResults[saveNumber].cancelEdit();
+					isTaken[saveNumber] = true;
+					resetUI();
+					sumNumbers();
+					lockAll();
+					gameComplete();
+				}
+			}
+		
+		private void resetUI(){
+			String[] tempValuez = {"", "", "", "", ""};
+			for(int i = 0; i < yatzy.getValues().length; i++) {
+				txfValues[i].setText(tempValuez[i] + "");
+				chbHolds[i].setSelected(false);
+			}
+			btnRoll.setDisable(false);
+			lblRolled.setText("Rolled: " + yatzy.getThrowCount());
+			btnRoll.requestFocus();
+		}
+		private void sumSame(){
+			sumSame = 0; 
+			for(int i = 0; i <6; i++){
+				if(isTaken[i]){
+					sumSame += Integer.parseInt(txfResults[i].getText());
+				}
+				txfSumSame.setText(sumSame+"");
 			}
 		}
-
-		throwCount++;
-	}
-
-	/**
-	 * Returns the number of times the five dice have been thrown.
-	 */
-	public int getThrowCount() {
-		return throwCount;
-	}
-
-	/**
-	 * Resets the throw count.
-	 */
-	public void resetThrowCount() {
-		throwCount = 0;
-	}
-
-	/**
-	 * Get current dice values
-	 */
-	public int[] getValues() {
-		return values;
-	}
-
-	/**
-	 * Set the current dice values
-	 */
-	public void setValues(int[] values) {
-		this.values = values;
-	}
-
-	/**
-	 * Returns all results possible with the current face values. <br/>
-	 * The order of the results is the same as on the score board.
-	 */
-	public int[] getPossibleResults() {
-		int[] results = new int[15];
-		for(int i = 0; i <= 5; i++) {
-			results[i] = this.valueSpecificFace(i + 1);
-		}
-		results[6] = this.valueOnePair();
-		results[7] = this.valueTwoPair();
-		results[8] = this.valueThree();
-		results[9] = this.valueFour();
-		results[10] = this.valueFullHouse();
-		results[11] = this.valueSmallStraight();
-		results[12] = this.valueLargeStraight();
-		results[13] = this.valueChance();
-		results[14] = this.valueYatzy();
-		return results;
-	}
-
-	/**
-	 * Returns an int[7] containing the frequency of face values. <br/>
-	 * Frequency at index v is the number of dice with the face value v, 1 <= v
-	 * <= 6. <br/>
-	 * Index 0 is not used.
-	 */
-	private int[] freqFaceValue() {
-
-		int[] req = new int[7];
-		for (int i = 0; i < values.length; i++){
-			for(int j = 1; j < req.length; j++){
-				if(j == values[i]){
-					req[j]++;
+		private void sumOther(){
+			sumOther = 0;
+			for(int i = 6; i<isTaken.length; i++){
+				if(isTaken[i]){
+					sumOther += Integer.parseInt(txfResults[i].getText());
 				}
+				txfSumOther.setText(sumOther+"");
+			}
+		}
+		private void sumBonus(){
+			bonus = 0;
+			if(sumSame >= 63){
+				txfBonus.setText("50");
 			}
 			
 		}
-				
-			
-		
-
-		return req;
-		
-	}
-
-	/**
-	 * Returns the total value for the dice currently showing the given face
-	 * value
-	 *
-	 * @param face
-	 *            the face value to return values for
-	 */
-	public int valueSpecificFace(int face) {
-
-		
-		
-		int[] count = freqFaceValue();
-
-		int numberToReturn = count[face];
-
-		return numberToReturn*face;
-	}
-
-	/**
-	 * Returns the maximum value for n-of-a-kind for the given n. <br/>
-	 * For example, valueManyOfAKind(3) returns the maximum value for 3
-	 * of-a-kind. <br/>
-	 * Requires: 1 <= faceValue and faceValue <= 6
-	 *
-	 * @param n
-	 *            number of kind
-	 */
-	public int valueManyOfAKind(int n) {
-		int[] valuez = freqFaceValue();
-		int sum = 0;
-		for(int i = 1; i < valuez.length; i++){
-			if(valuez[i] >= n){
-				sum = n*i;
-			}
+		private void sumTotal(){
+			total = sumSame+sumOther+bonus;
+			txfTotal.setText(total+"");
 		}
-		return sum;
-	}
-
-	/**
-	 * The current value if you try to score the current face values as Yatzy.
-	 */
-	public int valueYatzy() {
-		boolean yatzy = true;
-		int points = 0;
-		int check = values[0];
+		/**
+		 * Calls upon the previous four methods to add the sums to their corresponding TextFields in the scorePane.
+		 */
+		private void sumNumbers(){
+			sumSame();
+			sumOther();
+			sumBonus();
+			sumTotal();
+		}
 		
-		for(int i = 1; i < values.length; i++){
-			if(values[i] != check) {
-				yatzy = false;
-
-			}
-		}
-		if(yatzy){
-			points = 50;
-		}
-		return points;
-		}
-
-	/**
-	 * Returns the current score if used as "chance".
-	 */
-	public int valueChance() {
-		int sum = 0;
-		for(int i = 0; i < values.length; i++){
-			sum += values[i];
-		}
-		return sum;
-	}
-
-	/**
-	 * Returns the current score for one pair.
-	 */
-	public int valueOnePair() {
-		int numberToCount = 0;
-		int count = 0;
-		int sum = 0;
-		int highest = 0;
-
-		for (int i = 0; i < values.length; i++) {
-
-			numberToCount = values[i];
-
-			for (int j = 0; j < values.length; j++) {
-
-				if (values[j] == values[i] && values[j] == numberToCount) {
-					if (j != i && values[j] > highest) {
-						count++;
-						highest = values[j];
-					}
+		/**
+		 * Disables all of the non-selected sums, so the player cannot save several results on one throw
+		 * this method is called upon in the saveResult(saveNumber) method.
+		 */
+		private void lockAll(){
+			for(int i = 0; i < isTaken.length; i++){
+				if (!isTaken[i]){
+					txfResults[i].setDisable(true);
 				}
 			}
-
-			if (count >= 1) {
-				sum = highest;
-				count = 0;
+		}
+		/**
+		 * re-enables the non-selected sums, so the player can resume the game as normal.
+		 * this method is called upon in the rollDices() method.
+		 */
+		private void unlockRest(){
+			for(int i = 0; i < isTaken.length; i++){
+				if(!isTaken[i]){
+					txfResults[i].setDisable(false);
+				}
 			}
 		}
-
-		return sum*2;
-		
-	}
-
-	/**
-	 * Returns the current score for two pairs.
-	 */
-	public int valueTwoPair() {
-		int[] valuez = freqFaceValue();
-		int sum = 0;
-		int count = 0;
-		int sum1 = 0;
-		int sum2 = 0;
-		/*
-		for(int i = 1; i <=6; i++){
-			for(int j = 0; j < values.length; j++){
-				if(valueOnePair()/2==i){
+		/**
+		 * checks if the game is complete, if so, gives users an alert
+		 */
+		private void gameComplete(){
+			int count = 0;
+			for(int i = 0; i < isTaken.length; i++){
+				if(isTaken[i]){
 					count++;
 				}
 			}
-			if(count>=2){
-				sum1=valueOnePair();
-				}
-			count = 0;
-			}
-			
-	
-		for(int i = 1; i <=6; i++){
-			for(int j = 0; j < values.length; j++){
-				if(valueOnePair()/2==i && i != sum1/2){
-					count++;
-				}
-			}
-			if(count>=2){
-				sum2=valueOnePair();
-			}
-			count = 0;
-		}
-		*/
-		for(int i = 1; i < valuez.length; i++) {
-			if(valuez[i] >= 2) {
-				count++;
-				sum1=2*i;
-				}
-			if(count >=2){
-				sum = 0;
-			}
-			count=0;
-		}
-		for(int i = 1; i < valuez.length; i++){
-			if(valuez[i]>=2 && i != sum1/2){
-				count++;
-				sum2=2*i;
-			}
-			if(count >= 2){
-				sum = 0;
-			}
-			count=0;
-		}
-		
-		if(sum1 > 0 && sum2 > 0){
-			sum = sum1+sum2;
-		}
-		return sum;
-	}
-	public int valueOnePairFix(){
-		int[] valuez = freqFaceValue();
-		int count = 0;
-		int sum = 0;
-		int highest = Integer.MAX_VALUE;
-		int amount = 0;
-		for (int i = 0; i < values.length; i++) {
-			for (int j = 0; j < values.length; j++) {
-				if (values[j] == values[i]) {
-					if (j != i && values[j] <= highest) {
-						count++;
-						highest = values[j];
-						amount = valuez[i];
-					}
-				}
-			
-			}
-
-			if (count >= 1 && amount == 2) {
-				sum = highest;
-				count = 0;
+			if(count == isTaken.length){
+				gameCompleteAlert();
 			}
 		}
-		System.out.println(amount);
-
-		return sum*2;
-	}
-	
-
-	/**
-	 * Returns the current score for three of a kind.
-	 */
-	public int valueThree() {
-		return valueManyOfAKind(3);
-	}
-
-	/**
-	 * Returns the current score for four of a kind.
-	 */
-	public int valueFour() {
-		return valueManyOfAKind(4);
-	}
-
-	/**
-	 * Returns the value of a small straight with the current face values.
-	 */
-	public int valueSmallStraight(){
-		int[] valuez = freqFaceValue();
-		int sum = 1;
-		for(int i = 1; i <= values.length; i++)
-		{
-			if(valuez[i] == 1 && valuez[6] == 0 && sum != 0)
-			{
-				sum = 15;
-			}
-			else{
-				sum = 0;
-			}
-		}
-		return sum;
-	}
-	/**
-	 * Returns the value of a large straight with the current face values.
-	 */
-	public int valueLargeStraight() {
-		int[] valuez = freqFaceValue();
-		int sum = 1;
-		for(int i = 1; i <= values.length; i++){
-			if(valuez[i] == 1 && valuez[1] == 0 && sum != 0){
-				sum = 20;
-			}
-			else{
-				sum = 0;
-			}
-		}
-		return sum;
-	}
-
-	/**
-	 * Returns the value of a full house with the current face values.
-	 */
-	public int valueFullHouse() {
-		boolean fullHouse = false;
-		int[] valuez = freqFaceValue();
-		int sum3= 0;
-		int sum2 = 0;
-		//forsøg 1
-		//if(valueThree() > 0 && valueOnePair() > 0){
-				//	return valueThree() + valueOnePair();
-				//}else{
-				//	return 0;
-			//	}
-		//forsøg 2
-		 if (valueThree() > 0 && valueOnePair()> 0){
-			if(valueThree()/3 != valueOnePair()/2){
-				fullHouse = true;
-			}
-		}
-		if(fullHouse){
-			return valueOnePair() + valueThree();
-		}
-		else{
-			return 0;
-		}
-				
-	
-		//forsøg 3
-		/*for (int i = 0; i < values.length; i++){
-			if (valuez[i] == 2){
-				sum2 = 2*values[i];
-			}
-			if (valuez[i] == 3){
-				sum3= 3*values[i];
-			}
-		}
-		if(sum2>0&&sum3>0){
-			return sum2+sum3;
-		}
-		else{
-			return 0;
+		/**
+		 * Creates an alert shown to the player, informing the user of his points, with an option to play a new game if the player wishes.
+		 */
+		private void gameCompleteAlert(){
+			Alert gameCompleted = new Alert(AlertType.CONFIRMATION);
+			gameCompleted.setTitle("Game Complete");
+			gameCompleted.setHeaderText("Your points: ");
 			
 		}
-		*/
-		//forsøg 4
-		//int[]fullHouseArray = values;
-		//Arrays.sort(fullHouseArray);
-		//int tempSum = 0;
-		//if(fullHouseArray[0] == fullHouseArray[1] && fullHouseArray[1] == fullHouseArray[2] && fullHouseArray[2] == fullHouseArray[3] && fullHouseArray[3] == fullHouseArray[4]){
-		//	return fullHouseArray[0] + fullHouseArray[1] +fullHouseArray[2] +fullHouseArray[3] +fullHouseArray[4];
-	//	}
-		//else{
-	//		return 0;
-	//	}
 	}
-
 }
