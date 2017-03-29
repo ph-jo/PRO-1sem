@@ -105,6 +105,7 @@ public class MainApp extends Application {
 			scorePane.add(tf, 1, 0+i);
 			scorePane.add(lb, 0, 0+i);
 			txfResults[i] = tf;
+			tf.setDisable(true);
 			tf.setOnMouseClicked(event->controller.saveResult(count));
 		}
 		Label sum = new Label("Sum:"); Label bonus = new Label("Bonus:"); 	Label sum2 = new Label("Sum:");	Label total = new Label("Total:");
@@ -138,14 +139,13 @@ public class MainApp extends Application {
 		txfBonus.setFont(Font.font(STYLESHEET_CASPIAN, FontWeight.BOLD, 12));
 		txfBonus.setStyle("-fx-text-fill: blue");
 		
-		
 	}
 	// -------------------------------------------------------------------------
 	/**
 	 * This class controls access to the model in this application.
 	 */
 	private class Controller {
-		
+
 		private void rollDices() {
 			unlockRest();
 			
@@ -293,9 +293,19 @@ public class MainApp extends Application {
 		 * Creates an alert shown to the player, informing the user of his points, with an option to play a new game if the player wishes.
 		 */
 		private void gameCompleteAlert(){
-			Alert gameCompleted = new Alert(AlertType.CONFIRMATION);
+			Alert gameCompleted = new Alert(AlertType.INFORMATION);
 			gameCompleted.setTitle("Game Complete");
-			gameCompleted.setHeaderText("Your points: ");
+			gameCompleted.setHeaderText("Your points: " + txfTotal.getText());
+			Button yesBtn = new Button("Yes");
+			Button noBtn = new Button("No");
+			gameCompleted.getButtonTypes();
+			gameCompleted.showAndWait();
+	
+			if(yesBtn.isPressed()){
+				resetUI();
+			}
+			
+			
 			
 		}
 	}
