@@ -4,11 +4,16 @@ public class EmailEvaluator implements Evaluator {
 
 	@Override
 	public boolean isValid(String s) {
-		String regex = "\\w+\\d*.*\\w*\\d*@+\\w+\\d*.*\\w+\\d*";
-		if (s.matches(regex) && !s.equals("") && !s.contains("\\s")) {
-			return true;
+	    boolean erStrengenEnMail = false;
+		try {
+			if (s.matches("[A-Z0-9._%+-]@*[A-Z0-9.-].*[A-Z]")) {
+				erStrengenEnMail = true;
+			}
+			return erStrengenEnMail;
 		}
-		return false;
+		catch (Exception e) {
+	    	return false;
+		}
 	}
 
 }

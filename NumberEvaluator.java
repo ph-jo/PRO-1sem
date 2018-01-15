@@ -4,10 +4,12 @@ public class NumberEvaluator implements Evaluator {
 
 	@Override
 	public boolean isValid(String s) {
-		String regex = "-?\\d*\\.?\\d+E?\\d*";
-		if (s.matches(regex) && !s.equals("")) {
-			return true;
+		try {
+			Double.parseDouble(s);
 		}
-		return false;
+		catch(Exception e) {
+			return false;
+		}
+		return true;
 	}
 }
